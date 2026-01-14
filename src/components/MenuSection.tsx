@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { X, Clock, Flame, Snowflake } from 'lucide-react';
+import { Clock, Flame, Snowflake } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -288,6 +289,13 @@ export default function MenuSection() {
                   className="btn-electric px-8 py-3 bg-accent text-accent-foreground font-display text-sm tracking-wider rounded-full"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    toast({
+                      title: "Added to Order",
+                      description: `${selectedItem.name} - $${selectedItem.price.toFixed(2)}`,
+                    });
+                    setSelectedItem(null);
+                  }}
                 >
                   Add to Order
                 </motion.button>
