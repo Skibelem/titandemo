@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { Clock, Flame, Snowflake } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -290,8 +290,7 @@ export default function MenuSection() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    toast({
-                      title: "Added to Order",
+                    toast.success("Added to Order", {
                       description: `${selectedItem.name} - $${selectedItem.price.toFixed(2)}`,
                     });
                     setSelectedItem(null);
