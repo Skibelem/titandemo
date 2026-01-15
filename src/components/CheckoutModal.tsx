@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Coffee, MapPin, Clock, CreditCard, User, Phone } from 'lucide-react';
+import { Check, Coffee, MapPin, Clock, CreditCard, User, Phone, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
+import { useCreateOrder } from '@/hooks/useOrders';
 import {
   Dialog,
   DialogContent,
@@ -27,12 +28,15 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
     phone: '',
     pickupTime: '15',
   });
+  const [orderConfirmation, setOrderConfirmation] = useState<{ orderId: string } | null>(null);
+
+  const createOrder = useCreateOrder();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (step === 'details') {
       if (!formData.name || !formData.phone) {
         toast.error('Please fill in all fields');
@@ -42,10 +46,27 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
     } else if (step === 'pickup') {
       setStep('payment');
     } else if (step === 'payment') {
-      // Simulate payment processing
-      setTimeout(() => {
+      try {
+        const tax = totalPrice * 0.08;
+        const total = totalPrice + tax;
+        
+        const result = await createOrder.mutateAsync({
+          customerName: formData.name,
+          customerPhone: formData.phone,
+          pickupTime: parseInt(formData.pickupTime),
+          items,
+          subtotal: totalPrice,
+          tax,
+          total,
+        });
+        
+        setOrderConfirmation({ orderId: result.orderId });
         setStep('success');
-      }, 1000);
+        toast.success('Order placed successfully!');
+      } catch (error) {
+        console.error('Failed to create order:', error);
+        toast.error('Failed to place order. Please try again.');
+      }
     }
   };
 
@@ -54,6 +75,7 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
       clearCart();
       setStep('details');
       setFormData({ name: '', phone: '', pickupTime: '15' });
+      setOrderConfirmation(null);
     }
     onOpenChange(false);
   };
@@ -275,6 +297,16 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
                 >
                   Your order will be ready in {formData.pickupTime} minutes
                 </motion.p>
+                {orderConfirmation && (
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.65 }}
+                    className="text-muted-foreground/60 text-sm mt-2"
+                  >
+                    Order #{orderConfirmation.orderId.slice(0, 8).toUpperCase()}
+                  </motion.p>
+                )}
               </div>
 
               <motion.div
@@ -292,14 +324,24 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
 
         {step !== 'success' && (
           <motion.button
-            className="w-full btn-electric mt-6 py-4 bg-accent text-accent-foreground font-display text-lg tracking-wider rounded-full"
+            className="w-full btn-electric mt-6 py-4 bg-accent text-accent-foreground font-display text-lg tracking-wider rounded-full flex items-center justify-center gap-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleSubmit}
+            disabled={createOrder.isPending}
           >
-            {step === 'details' && 'Continue to Pickup'}
-            {step === 'pickup' && 'Continue to Payment'}
-            {step === 'payment' && 'Place Order'}
+            {createOrder.isPending ? (
+              <>
+                <Loader2 className="animate-spin" size={20} />
+                Processing...
+              </>
+            ) : (
+              <>
+                {step === 'details' && 'Continue to Pickup'}
+                {step === 'pickup' && 'Continue to Payment'}
+                {step === 'payment' && 'Place Order'}
+              </>
+            )}
           </motion.button>
         )}
       </DialogContent>
