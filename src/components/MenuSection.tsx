@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { Clock, Flame, Snowflake } from 'lucide-react';
+import { Clock, Flame, Snowflake, ShoppingCart } from 'lucide-react';
 import { toast } from 'sonner';
+import { useCart } from '@/contexts/CartContext';
 import {
   Dialog,
   DialogContent,
@@ -125,6 +126,7 @@ export default function MenuSection() {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
+  const { addItem } = useCart();
 
   const filteredItems = menuItems.filter(item => item.category === activeCategory);
 
@@ -286,17 +288,24 @@ export default function MenuSection() {
                 </span>
                 
                 <motion.button
-                  className="btn-electric px-8 py-3 bg-accent text-accent-foreground font-display text-sm tracking-wider rounded-full"
+                  className="btn-electric px-8 py-3 bg-accent text-accent-foreground font-display text-sm tracking-wider rounded-full flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => {
-                    toast.success("Added to Order", {
+                    addItem({
+                      id: selectedItem.id,
+                      name: selectedItem.name,
+                      price: selectedItem.price,
+                      image: selectedItem.image,
+                    });
+                    toast.success("Added to Cart", {
                       description: `${selectedItem.name} - $${selectedItem.price.toFixed(2)}`,
                     });
                     setSelectedItem(null);
                   }}
                 >
-                  Add to Order
+                  <ShoppingCart size={18} />
+                  Add to Cart
                 </motion.button>
               </div>
             </div>
