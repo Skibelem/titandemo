@@ -5,6 +5,9 @@ import { CartItem } from '@/contexts/CartContext';
 interface CreateOrderData {
   customerName: string;
   customerPhone: string;
+  customerEmail: string;
+  deliveryType: 'pickup' | 'delivery';
+  deliveryAddress?: string;
   pickupTime: number;
   items: CartItem[];
   subtotal: number;
@@ -20,18 +23,19 @@ interface OrderResult {
 export function useCreateOrder() {
   return useMutation({
     mutationFn: async (data: CreateOrderData): Promise<OrderResult> => {
-      console.log('Creating order:', data);
-
-      // Create the order
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
         .insert({
           customer_name: data.customerName,
           customer_phone: data.customerPhone,
+          email: data.customerEmail,
+          delivery_type: data.deliveryType,
+          delivery_address: data.deliveryAddress || null,
           pickup_time: data.pickupTime,
           subtotal: data.subtotal,
           tax: data.tax,
           total: data.total,
+          payment_status: 'pending',
         })
         .select('id, order_token')
         .single();
@@ -41,9 +45,6 @@ export function useCreateOrder() {
         throw orderError;
       }
 
-      console.log('Order created:', orderData);
-
-      // Create order items
       const orderItems = data.items.map(item => ({
         order_id: orderData.id,
         product_id: item.id,
@@ -61,12 +62,23 @@ export function useCreateOrder() {
         throw itemsError;
       }
 
-      console.log('Order items created successfully');
-
       return {
         orderId: orderData.id,
         orderToken: orderData.order_token,
       };
+    },
+  });
+}
+
+export function useVerifyPayment() {
+  return useMutation({
+    mutationFn: async ({ reference, orderId }: { reference: string; orderId: string }) => {
+      const { data, error } = await supabase.functions.invoke('verify-payment', {
+        body: { reference, orderId },
+      });
+
+      if (error) throw error;
+      return data;
     },
   });
 }
