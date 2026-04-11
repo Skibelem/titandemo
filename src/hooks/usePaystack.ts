@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 declare global {
   interface Window {
@@ -18,18 +19,29 @@ declare global {
 
 export function usePaystack() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [publicKey, setPublicKey] = useState<string | null>(null);
 
   useEffect(() => {
-    if (document.getElementById('paystack-script')) {
+    // Load Paystack script
+    if (!document.getElementById('paystack-script')) {
+      const script = document.createElement('script');
+      script.id = 'paystack-script';
+      script.src = 'https://js.paystack.co/v2/inline.js';
+      script.async = true;
+      script.onload = () => setIsLoaded(true);
+      document.head.appendChild(script);
+    } else {
       setIsLoaded(true);
-      return;
     }
-    const script = document.createElement('script');
-    script.id = 'paystack-script';
-    script.src = 'https://js.paystack.co/v2/inline.js';
-    script.async = true;
-    script.onload = () => setIsLoaded(true);
-    document.head.appendChild(script);
+
+    // Fetch public key from edge function
+    supabase.functions.invoke('get-paystack-key').then(({ data, error }) => {
+      if (!error && data?.publicKey) {
+        setPublicKey(data.publicKey);
+      } else {
+        console.error('Failed to fetch Paystack key:', error);
+      }
+    });
   }, []);
 
   const pay = useCallback(
@@ -40,7 +52,7 @@ export function usePaystack() {
       onClose,
     }: {
       email: string;
-      amount: number; // in kobo/cents
+      amount: number;
       onSuccess: (reference: string) => void;
       onClose: () => void;
     }) => {
@@ -48,10 +60,8 @@ export function usePaystack() {
         console.error('Paystack not loaded');
         return;
       }
-
-      const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
       if (!publicKey) {
-        console.error('Paystack public key not configured');
+        console.error('Paystack public key not available');
         return;
       }
 
@@ -60,16 +70,14 @@ export function usePaystack() {
         email,
         amount,
         currency: 'NGN',
-        callback: (response) => {
-          onSuccess(response.reference);
-        },
+        callback: (response) => onSuccess(response.reference),
         onClose,
       });
 
       handler.openIframe();
     },
-    []
+    [publicKey]
   );
 
-  return { pay, isLoaded };
+  return { pay, isLoaded: isLoaded && !!publicKey };
 }
