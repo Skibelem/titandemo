@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -64,8 +82,13 @@ export type Database = {
           created_at: string
           customer_name: string
           customer_phone: string
+          delivery_address: string | null
+          delivery_type: string
+          email: string | null
           id: string
           order_token: string
+          payment_reference: string | null
+          payment_status: string
           pickup_time: number
           status: Database["public"]["Enums"]["order_status"]
           subtotal: number
@@ -76,8 +99,13 @@ export type Database = {
           created_at?: string
           customer_name: string
           customer_phone: string
+          delivery_address?: string | null
+          delivery_type?: string
+          email?: string | null
           id?: string
           order_token?: string
+          payment_reference?: string | null
+          payment_status?: string
           pickup_time?: number
           status?: Database["public"]["Enums"]["order_status"]
           subtotal: number
@@ -88,8 +116,13 @@ export type Database = {
           created_at?: string
           customer_name?: string
           customer_phone?: string
+          delivery_address?: string | null
+          delivery_type?: string
+          email?: string | null
           id?: string
           order_token?: string
+          payment_reference?: string | null
+          payment_status?: string
           pickup_time?: number
           status?: Database["public"]["Enums"]["order_status"]
           subtotal?: number
@@ -139,7 +172,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin_email: { Args: { _email: string }; Returns: boolean }
     }
     Enums: {
       order_status:
