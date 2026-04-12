@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
-import { toast } from 'sonner';
+
 
 const navLinks = [
   { name: 'Menu', href: '#menu' },
@@ -65,7 +65,7 @@ export default function Navigation() {
                 className="btn-electric px-6 py-2 bg-accent text-accent-foreground font-display text-sm tracking-wider rounded-full"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => toast("Wait a-bit ☕", { description: "Coming Soon!" })}
+                onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 Order Now
               </motion.button>
@@ -112,7 +112,7 @@ export default function Navigation() {
                 transition={{ delay: 0.3 }}
                 className="btn-electric mt-4 px-8 py-4 bg-accent text-accent-foreground font-display text-lg tracking-wider rounded-full w-fit"
                 onClick={() => {
-                  toast("Wait a-bit ☕", { description: "Coming Soon!" });
+                  document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
                   setIsMobileMenuOpen(false);
                 }}
               >
