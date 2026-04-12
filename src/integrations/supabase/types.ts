@@ -83,6 +83,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivery_address: string | null
+          delivery_lat: number | null
+          delivery_lng: number | null
           delivery_type: string
           email: string | null
           id: string
@@ -100,6 +102,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivery_address?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           delivery_type?: string
           email?: string | null
           id?: string
@@ -117,6 +121,8 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           delivery_address?: string | null
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           delivery_type?: string
           email?: string | null
           id?: string
