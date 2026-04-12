@@ -206,6 +206,13 @@ export default function Admin() {
                         <p className="text-foreground text-sm">{order.customer_name}</p>
                         <p className="text-muted-foreground text-xs">{order.customer_phone}</p>
                       </td>
+                      <td className="p-4 hidden sm:table-cell">
+                        <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                          order.delivery_type === 'delivery' ? 'bg-blue-500/20 text-blue-400' : 'bg-emerald-500/20 text-emerald-400'
+                        }`}>
+                          {order.delivery_type}
+                        </span>
+                      </td>
                       <td className="p-4 text-muted-foreground text-sm hidden md:table-cell">
                         {order.order_items?.length || 0} items
                       </td>
