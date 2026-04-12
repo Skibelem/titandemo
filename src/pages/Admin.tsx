@@ -21,6 +21,8 @@ interface Order {
   email: string | null;
   delivery_type: string;
   delivery_address: string | null;
+  delivery_lat: number | null;
+  delivery_lng: number | null;
   pickup_time: number;
   status: string;
   subtotal: number;
