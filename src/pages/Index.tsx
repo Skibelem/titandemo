@@ -4,8 +4,6 @@ import HeroSection from '@/components/HeroSection';
 import MenuSection from '@/components/MenuSection';
 import SocialsSection from '@/components/SocialsSection';
 import Footer from '@/components/Footer';
-import CartButton from '@/components/CartButton';
-import CartSidebar from '@/components/CartSidebar';
 
 const Index = () => {
   useEffect(() => {
@@ -22,8 +20,6 @@ const Index = () => {
       <MenuSection />
       <SocialsSection />
       <Footer />
-      <CartButton />
-      <CartSidebar />
     </main>
   );
 };
