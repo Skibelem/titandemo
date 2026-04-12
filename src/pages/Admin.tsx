@@ -181,6 +181,7 @@ export default function Admin() {
                 <tr className="border-b border-border">
                   <th className="text-left p-4 font-display text-sm text-muted-foreground">Order</th>
                   <th className="text-left p-4 font-display text-sm text-muted-foreground">Customer</th>
+                  <th className="text-left p-4 font-display text-sm text-muted-foreground hidden sm:table-cell">Type</th>
                   <th className="text-left p-4 font-display text-sm text-muted-foreground hidden md:table-cell">Items</th>
                   <th className="text-left p-4 font-display text-sm text-muted-foreground">Total</th>
                   <th className="text-left p-4 font-display text-sm text-muted-foreground">Payment</th>
