@@ -256,13 +256,45 @@ export default function Admin() {
                 <div><span className="text-muted-foreground">Customer:</span> <span className="text-foreground">{selectedOrder.customer_name}</span></div>
                 <div><span className="text-muted-foreground">Phone:</span> <span className="text-foreground">{selectedOrder.customer_phone}</span></div>
                 <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground">{selectedOrder.email || 'N/A'}</span></div>
-                <div><span className="text-muted-foreground">Type:</span> <span className="text-foreground capitalize">{selectedOrder.delivery_type}</span></div>
-                {selectedOrder.delivery_address && (
-                  <div className="col-span-2"><span className="text-muted-foreground">Address:</span> <span className="text-foreground">{selectedOrder.delivery_address}</span></div>
-                )}
                 <div><span className="text-muted-foreground">Payment:</span> <span className={`capitalize ${selectedOrder.payment_status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>{selectedOrder.payment_status}</span></div>
                 {selectedOrder.payment_reference && (
-                  <div><span className="text-muted-foreground">Ref:</span> <span className="text-foreground font-mono text-xs">{selectedOrder.payment_reference}</span></div>
+                  <div className="col-span-2"><span className="text-muted-foreground">Ref:</span> <span className="text-foreground font-mono text-xs">{selectedOrder.payment_reference}</span></div>
+                )}
+              </div>
+
+              {/* Delivery / Pickup Section */}
+              <div className="border-t border-border pt-3">
+                <h3 className="font-display text-secondary mb-2 flex items-center gap-2">
+                  {selectedOrder.delivery_type === 'delivery' ? (
+                    <><span className="inline-block w-2 h-2 rounded-full bg-blue-400" /> Delivery</>
+                  ) : (
+                    <><span className="inline-block w-2 h-2 rounded-full bg-green-400" /> Pickup</>
+                  )}
+                </h3>
+                {selectedOrder.delivery_type === 'delivery' ? (
+                  <div className="space-y-2">
+                    {selectedOrder.delivery_address && (
+                      <p className="text-foreground text-sm">{selectedOrder.delivery_address}</p>
+                    )}
+                    {selectedOrder.delivery_lat && selectedOrder.delivery_lng && (
+                      <a
+                        href={`https://www.google.com/maps?q=${selectedOrder.delivery_lat},${selectedOrder.delivery_lng}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-accent text-xs hover:underline"
+                      >
+                        📍 View on Map ({selectedOrder.delivery_lat.toFixed(4)}, {selectedOrder.delivery_lng.toFixed(4)})
+                      </a>
+                    )}
+                    {!selectedOrder.delivery_address && !selectedOrder.delivery_lat && (
+                      <p className="text-muted-foreground text-xs">No address provided</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <p className="text-foreground text-sm">Titans Coffee — 123 Desert Tech Blvd, Lagos</p>
+                    <p className="text-muted-foreground text-xs">Pickup in {selectedOrder.pickup_time} minutes</p>
+                  </div>
                 )}
               </div>
 
