@@ -36,7 +36,27 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create auth user with auto-confirm
+    // Check if user already exists
+    const { data: { users } } = await supabase.auth.admin.listUsers();
+    const existingUser = users?.find((u: any) => u.email === email);
+
+    if (existingUser) {
+      // Update password for existing user
+      const { error } = await supabase.auth.admin.updateUserById(existingUser.id, {
+        password,
+        email_confirm: true,
+      });
+      if (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ success: true, action: "updated", user_id: existingUser.id }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Create new user
     const { data, error } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -49,7 +69,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    return new Response(JSON.stringify({ success: true, user_id: data.user.id }), {
+    return new Response(JSON.stringify({ success: true, action: "created", user_id: data.user.id }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
