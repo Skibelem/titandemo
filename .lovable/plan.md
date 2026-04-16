@@ -1,32 +1,28 @@
 
 
-# Set Up Admin Auth Account
+# Add "Create Account" to Admin Login
 
 ## Problem
-The `admin_users` table has `admin@titanscoffee.com` registered, but no corresponding authentication account exists. The admin can't log in.
+The edge function approach for creating admin accounts is clunky. The user wants a self-service "Create Account" flow directly on the `/admin` login page.
 
 ## Solution
-Create an auth account for the admin email so they can sign in at `/admin`.
+Add a signup mode to `AdminLogin.tsx` that lets someone create an auth account — but **only** if their email exists in the `admin_users` table. The edge function `create-admin-user` handles the secure account creation (it already checks the admin_users table).
 
-### Steps
+### Changes
 
-1. **Create the admin auth user** via a database migration that uses `auth.create_user()` or via the Supabase admin API — however, since we can't directly create auth users through migrations safely, the best approach is to:
+1. **Update `AdminLogin.tsx`**
+   - Add a toggle between "Sign In" and "Create Account" modes
+   - In "Create Account" mode, collect email + password + confirm password
+   - Call the `create-admin-user` edge function to create the account
+   - On success, auto-switch to sign-in mode with a success toast
+   - Non-admin emails get rejected by the edge function (403)
 
-   - Add a **simple signup flow** or use the Supabase client to create the account programmatically via an edge function.
-   
-   **Recommended approach:** Create a one-time edge function `create-admin-user` that:
-   - Accepts an admin email and password
-   - Uses the service role key to call `supabase.auth.admin.createUser()`
-   - Only works if the email is already in the `admin_users` table
-   - Auto-confirms the email so the admin can log in immediately
+2. **No database changes needed** — the `admin_users` table and `create-admin-user` edge function already handle validation.
 
-2. **Invoke the edge function once** to create the account with a password you choose.
+3. **Clean up the hardcoded password** — remove the `ADMIN_PASSWORD` secret since it's no longer needed; admins choose their own password via the form.
 
-3. **Optionally delete the edge function** after use, or keep it for future admin onboarding.
-
-### Alternative
-If you prefer, I can enable **auto-confirm for email signups** temporarily, and you can sign up directly at `/admin` with a modified login page that includes a "Create Account" option. Then disable auto-confirm after.
-
-### What you'll need to decide
-- **What password** do you want for the admin account? (You'll enter it as a secret or I'll prompt you during setup)
+### Security
+- Account creation is gated by the `admin_users` table check in the edge function
+- The edge function uses the service role key server-side — no client exposure
+- Password is chosen by the admin, not hardcoded
 
