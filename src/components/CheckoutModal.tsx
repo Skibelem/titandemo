@@ -1,6 +1,6 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Coffee, MapPin, Clock, CreditCard, User, Phone, Loader2, Mail, Truck, Store, Navigation } from 'lucide-react';
+import { Check, Coffee, MapPin, Clock, CreditCard, User, Phone, Loader2, Mail, Truck, Store } from 'lucide-react';
 import { toast } from 'sonner';
 import { useCart } from '@/contexts/CartContext';
 import { useCreateOrder, useVerifyPayment } from '@/hooks/useOrders';
@@ -13,9 +13,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const LocationPickerMap = lazy(() => import('@/components/LocationPickerMap'));
-const ShopLocationMap = lazy(() => import('@/components/ShopLocationMap'));
 
 interface CheckoutModalProps {
   open: boolean;
@@ -33,11 +30,8 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
     email: '',
     deliveryType: 'pickup' as 'pickup' | 'delivery',
     deliveryAddress: '',
-    deliveryLat: undefined as number | undefined,
-    deliveryLng: undefined as number | undefined,
     pickupTime: '15',
   });
-  const [showMapPicker, setShowMapPicker] = useState(false);
   const [orderConfirmation, setOrderConfirmation] = useState<{ orderId: string } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -64,8 +58,8 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
       }
       setStep('delivery');
     } else if (step === 'delivery') {
-      if (formData.deliveryType === 'delivery' && !formData.deliveryAddress) {
-        toast.error('Please enter a delivery address or pick a location on the map');
+      if (formData.deliveryType === 'delivery' && !formData.deliveryAddress.trim()) {
+        toast.error('Please enter a delivery address');
         return;
       }
       setStep('review');
@@ -78,8 +72,6 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
           customerEmail: formData.email,
           deliveryType: formData.deliveryType,
           deliveryAddress: formData.deliveryAddress,
-          deliveryLat: formData.deliveryLat,
-          deliveryLng: formData.deliveryLng,
           pickupTime: parseInt(formData.pickupTime),
           items,
           subtotal: totalPrice,
@@ -122,20 +114,10 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
     if (step === 'success') {
       clearCart();
       setStep('details');
-      setFormData({ name: '', phone: '', email: '', deliveryType: 'pickup', deliveryAddress: '', deliveryLat: undefined, deliveryLng: undefined, pickupTime: '15' });
+      setFormData({ name: '', phone: '', email: '', deliveryType: 'pickup', deliveryAddress: '', pickupTime: '15' });
       setOrderConfirmation(null);
-      setShowMapPicker(false);
     }
     onOpenChange(false);
-  };
-
-  const handleLocationSelect = (lat: number, lng: number, address: string) => {
-    setFormData(prev => ({
-      ...prev,
-      deliveryLat: lat,
-      deliveryLng: lng,
-      deliveryAddress: address,
-    }));
   };
 
   const steps = ['details', 'delivery', 'review', 'success'] as const;
@@ -210,7 +192,7 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => { setFormData(prev => ({ ...prev, deliveryType: 'pickup' })); setShowMapPicker(false); }}
+                    onClick={() => setFormData(prev => ({ ...prev, deliveryType: 'pickup' }))}
                     className={`p-4 rounded-xl border transition-all flex flex-col items-center gap-2 ${
                       formData.deliveryType === 'pickup'
                         ? 'border-accent bg-accent/10 text-accent'
@@ -246,10 +228,6 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
                       </div>
                     </div>
 
-                    <Suspense fallback={<div className="h-[160px] rounded-xl bg-muted/30 border border-border animate-pulse flex items-center justify-center text-muted-foreground text-sm">Loading map...</div>}>
-                      <ShopLocationMap />
-                    </Suspense>
-
                     <div className="space-y-2">
                       <Label className="text-foreground flex items-center gap-2">
                         <Clock size={16} className="text-accent" />
@@ -271,50 +249,16 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
                 )}
 
                 {formData.deliveryType === 'delivery' && (
-                  <div className="space-y-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="deliveryAddress" className="text-foreground">Delivery Address</Label>
-                      <Input
-                        id="deliveryAddress"
-                        name="deliveryAddress"
-                        value={formData.deliveryAddress}
-                        onChange={handleInputChange}
-                        placeholder="Enter your full delivery address"
-                        className="bg-muted/50 border-border focus:border-accent"
-                      />
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-xs text-muted-foreground">or</span>
-                      <div className="flex-1 h-px bg-border" />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowMapPicker(!showMapPicker)}
-                      className="w-full py-3 rounded-xl border border-border bg-muted/30 text-foreground font-display text-sm hover:border-accent/50 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Navigation size={16} className="text-accent" />
-                      {showMapPicker ? 'Hide Map' : 'Pick Location on Map'}
-                    </button>
-
-                    {showMapPicker && (
-                      <Suspense fallback={<div className="h-[200px] rounded-xl bg-muted/30 border border-border animate-pulse flex items-center justify-center text-muted-foreground text-sm">Loading map...</div>}>
-                        <LocationPickerMap
-                          onLocationSelect={handleLocationSelect}
-                          selectedLat={formData.deliveryLat}
-                          selectedLng={formData.deliveryLng}
-                        />
-                      </Suspense>
-                    )}
-
-                    {formData.deliveryLat && formData.deliveryLng && (
-                      <p className="text-xs text-accent flex items-center gap-1">
-                        <Check size={12} />
-                        Location pinned on map
-                      </p>
-                    )}
+                  <div className="space-y-2">
+                    <Label htmlFor="deliveryAddress" className="text-foreground">Delivery Address</Label>
+                    <Input
+                      id="deliveryAddress"
+                      name="deliveryAddress"
+                      value={formData.deliveryAddress}
+                      onChange={handleInputChange}
+                      placeholder="Enter your full delivery address"
+                      className="bg-muted/50 border-border focus:border-accent"
+                    />
                   </div>
                 )}
               </div>
@@ -369,7 +313,7 @@ export default function CheckoutModal({ open, onOpenChange }: CheckoutModalProps
                     </span>
                   </div>
                   {formData.deliveryType === 'delivery' && formData.deliveryAddress && (
-                    <div className="flex justify-between">
+                    <div className="flex justify-between gap-3">
                       <span className="text-muted-foreground">Address</span>
                       <span className="text-foreground text-right max-w-[60%]">{formData.deliveryAddress}</span>
                     </div>
