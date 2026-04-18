@@ -136,18 +136,11 @@ export default function OrderDetailModal({ order, onClose, onStatusUpdated }: Or
             </h3>
             {order.delivery_type === 'delivery' ? (
               <div className="space-y-2">
-                {order.delivery_address && <p className="text-foreground text-sm">{order.delivery_address}</p>}
-                {order.delivery_lat && order.delivery_lng && (
-                  <a
-                    href={`https://www.google.com/maps?q=${order.delivery_lat},${order.delivery_lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-accent text-xs hover:underline"
-                  >
-                    📍 View on Map ({order.delivery_lat.toFixed(4)}, {order.delivery_lng.toFixed(4)})
-                  </a>
+                {order.delivery_address ? (
+                  <p className="text-foreground text-sm">{order.delivery_address}</p>
+                ) : (
+                  <p className="text-muted-foreground text-xs">No address provided</p>
                 )}
-                {!order.delivery_address && !order.delivery_lat && <p className="text-muted-foreground text-xs">No address provided</p>}
               </div>
             ) : (
               <div className="space-y-1">

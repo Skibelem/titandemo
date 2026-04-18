@@ -8,8 +8,6 @@ interface CreateOrderData {
   customerEmail: string;
   deliveryType: 'pickup' | 'delivery';
   deliveryAddress?: string;
-  deliveryLat?: number;
-  deliveryLng?: number;
   pickupTime: number;
   items: CartItem[];
   subtotal: number;
@@ -33,8 +31,6 @@ export function useCreateOrder() {
           email: data.customerEmail,
           delivery_type: data.deliveryType,
           delivery_address: data.deliveryAddress || null,
-          delivery_lat: data.deliveryLat || null,
-          delivery_lng: data.deliveryLng || null,
           pickup_time: data.pickupTime,
           subtotal: data.subtotal,
           tax: data.tax,
