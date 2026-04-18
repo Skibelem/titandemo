@@ -64,9 +64,9 @@ export default function CartSidebar() {
                         <h4 className="font-display text-secondary font-medium truncate">
                           {item.name}
                         </h4>
-                        <p className="text-accent font-display">
-                          ${item.price.toFixed(2)}
-                        </p>
+                      <p className="text-accent font-display">
+                        ₦{item.price.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
+                      </p>
                         
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-2">
@@ -113,19 +113,19 @@ export default function CartSidebar() {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-display text-lg text-secondary">
-                  ${totalPrice.toFixed(2)}
+                  ₦{totalPrice.toLocaleString('en-NG', { minimumFractionDigits: 2 })}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Tax (8%)</span>
                 <span className="font-display text-secondary">
-                  ${(totalPrice * 0.08).toFixed(2)}
+                  ₦{(totalPrice * 0.08).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
                 </span>
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-border">
                 <span className="font-display text-lg text-foreground">Total</span>
                 <span className="font-display text-2xl text-accent">
-                  ${(totalPrice * 1.08).toFixed(2)}
+                  ₦{(totalPrice * 1.08).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
                 </span>
               </div>
               
