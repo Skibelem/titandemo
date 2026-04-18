@@ -146,7 +146,7 @@ export default function MenuSection() {
                         {item.name}
                       </h3>
                       <span className="font-display text-accent text-lg">
-                        ${Number(item.price).toFixed(2)}
+                        ₦{Number(item.price).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
                       </span>
                     </div>
                     <p className="text-muted-foreground text-sm line-clamp-2">
@@ -201,7 +201,7 @@ export default function MenuSection() {
               
               <div className="flex items-center justify-between">
                 <span className="font-display text-2xl text-accent">
-                  ${Number(selectedItem.price).toFixed(2)}
+                  ₦{Number(selectedItem.price).toLocaleString('en-NG', { minimumFractionDigits: 2 })}
                 </span>
                 
                 <motion.button
@@ -216,7 +216,7 @@ export default function MenuSection() {
                       image: selectedItem.image || '/placeholder.svg',
                     });
                     toast.success("Added to Cart", {
-                      description: `${selectedItem.name} - $${Number(selectedItem.price).toFixed(2)}`,
+                      description: `${selectedItem.name} - ₦${Number(selectedItem.price).toLocaleString('en-NG', { minimumFractionDigits: 2 })}`,
                     });
                     setSelectedItem(null);
                   }}
